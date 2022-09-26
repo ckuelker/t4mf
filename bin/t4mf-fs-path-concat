@@ -1,0 +1,73 @@
+#!/usr/bin/perl -CSDA
+# +---------------------------------------------------------------------------+
+# | t4mf-fs-path-concat                                                       |
+# |                                                                           |
+# | Concatenate STDIN and or ARGV into a path. It will remove:                |
+# | - a trailing slash    /       a b c/  -> a/b/c                            |
+# | - a leading dot slash ./      ./a b c -> a/b/c                            |
+# | - a middle dot slash ./       a ./b c -> a/b/c                            |
+# | - a middle double slash //    a b// c -> a/b/c                            |
+# | - a trailing double slash //  a b c// -> a/b/c                            |
+# | - a middle dot .              a . b c -> a/b/c                            |
+# | It will collapse:                                                         |
+# | - a leading double slash //   //a b c -> /a/b/c                           |
+# | - a middle  slash /           a b / c -> /a/b/c                           |
+# | It will not modify:                                                       |
+# | - a double dot ..             .. a .. b c .. -> ../a/../b/c/..            |
+# | - a leading slash / element   / a b c        -> /a/b/c                    |
+# | - a leading slash /           /a b c         -> /a/b/c                    |
+# |                                                                           |
+# | Version: 0.1.0                                                            |
+# |                                                                           |
+# | Copyright: (C) 2022 Christian Külker <c@c8i.org>                          |
+# |                                                                           |
+# | Changes:                                                                  |
+# |                                                                           |
+# | 0.1.0 2022-06-01 Christian Külker <c@c8i.org>                             |
+# |     - Initial release                                                     |
+# |                                                                           |
+# +---------------------------------------------------------------------------+
+# One could defined a path in a Makefile like:
+#
+#  sep := /
+#  empty:=
+#  space := $(empty) $(empty)
+#  list := path to a file
+#  file_path := $(subst $(space), $(sep), $(list))
+#
+# Or use this script like:
+#
+#  file_path := $(shell t4mf-fs-path-concat path to file)        # path/to/file
+#
+# Also this invocations are possible
+#
+#  file_path := $(shell echo 'path to file'|t4mf-fs-path-concat) # path/to/file
+#  file_path := $(shell echo 'path to'|t4mf-fs-path-concat file) # path/to/file
+#
+# Will produce: path/to/file
+#
+use utf8;                        # so literals and identifiers can be in UTF-8
+use v5.12;                       # or later to get "unicode_strings" feature
+use strict;                      # quote strings, declare variables
+use warnings;                    # on by default
+use warnings qw(FATAL utf8);     # make encoding glitches fatal
+use open qw(:std :utf8);         # undeclared streams in UTF-8
+use charnames qw(:full :short);  # unneeded in v5.16
+use utf8::all;                   # does probably all of the above and more
+                                 # turn on Unicode - all of it
+use File::Spec qw(catfile);
+
+my $p = q{};
+if ( -t STDIN ) {
+    $p = File::Spec->catfile(@ARGV);
+}
+else {
+    my $stdin = <STDIN>;
+    my @stdin = split( q{ }, $stdin );
+    $p = File::Spec->catfile( @stdin, @ARGV );
+}
+if ( defined $p ) {
+    $p =~ s{/$}{}gmx;
+    $p =~ s{^\./}{}gmx;
+    print $p;
+}

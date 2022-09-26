@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# +---------------------------------------------------------------------------+
+# | t4mf-yaml-get                                                             |
+# |                                                                           |
+# | Load YAML from file (as a single document) and returns nothing or a       |
+# | value. Python 'lists' or 'dict' keys will be concatenated.                |
+# |                                                                           |
+# | Version: 0.1.0 (change inline)                                            |
+# |                                                                           |
+# | Copyright: (C) 2022 Christian Külker <c@c8i.org>                          |
+# |                                                                           |
+# | Changes:                                                                  |
+# |                                                                           |
+# | 0.1.0 2022-05-24 Christian Külker <c@c8i.org>                             |
+# |     - Initial release                                                     |
+# |                                                                           |
+# +---------------------------------------------------------------------------+
+#
+# USAGE
+#
+#  t4mf-yaml-get CFG <PARAMETER 1> [PARAMETER 2] [PARAMETER 3] .. [PARAMETER N]
+#
+#  export DEBUG_T4MF_YAML_GET=/tmp/t4mf-yaml-get.log
+#  t4mf-yaml-get CFG <PARAMETER 1> [PARAMETER 2] [PARAMETER 3] .. [PARAMETER N]
+#  cat /tmp/t4mf-yaml-get.log
+#
+# EXAMPLES:
+#
+#  CFG file: cfg.yaml
+#
+#  ---
+#  man:
+#      feat:
+#          pfx: publish
+#      ifx: tmp
+#      drs:
+#           - a
+#           - b
+#           - c
+#
+#  ---
+#
+#  bin/t4mf-yaml-get cfg.yaml man feat pfx # -> publish
+#  bin/t4mf-yaml-get cfg.yaml man ifx #      -> tmp
+#  bin/t4mf-yaml-get cfg.yaml man #          -> feat ifx drs
+#  bin/t4mf-yaml-get cfg.yaml man drs #      -> a b c
+#
+#  CFG file: contet/index.md
+#
+#  ---
+#  title: Marktext
+#
+#  ---
+#
+#  bin/t4mf-yaml-get content/index.md title # -> Marktext
+#
+# LIMITATIONS:
+#
+# - The script do not much error detection.
+# - The script deliverers '' instead of 'None'. (Is a feature though)
+# - The script might be rewritten in a shorter more performant way
+#
+import os
+import sys
+import yaml
+from functools import reduce
+
+ns = 't4mf_yaml_get'
+version = '0.1.0'
+
+# Get a value from a nested dictionary
+def val_get(dct,keys,default=''):
+    r = reduce(lambda d, key: d.get(key, default) if isinstance(d,dict) else default, keys.split("|"), dct)
+    if r is None:
+        return ''
+    else:
+        return r
+
+# Debug message
+def d(msg):
+    fn = os.environ.get('DEBUG_%s' % ns.upper(), False)
+    if fn:
+        with open(fn, 'a') as fh:
+            fh.write("- %s: %s\n" % (ns, msg))
+
+d("version %s" % version)
+cfg = sys.argv[1] # DOMAIN.yaml
+
+try:
+    stream = open(cfg, 'r') # access DOMAIN.yaml
+except OSError:
+    print("Could not open/read file: %s" % cfg)
+    sys.exit()
+
+# Load cfg YAML (DOMAIN.yaml or index.md) into data
+data = next(yaml.load_all(stream,Loader=yaml.SafeLoader))
+keys = sys.argv # copy ARGV
+del keys[0] # remove script name
+del keys[0] # remove DOMAIN.yaml or index.md
+key = '|'.join(keys) # join command line to access string: a b -> a|b
+value = val_get(data, key)
+d("val_get: key         = [%s]" % key)
+d("val_get: YAML values = [%s]" % value)
+
+# Join a list of values to a string separated by space
+if isinstance(value, list):
+    d("type: list")
+    d("value: [%s]" % str.join(" ",value))
+    print(str.join(" ",value))
+
+# Remove deep content
+elif isinstance(value, dict):
+    d("type: dict")
+    d("value: [%s]" % str.join(" ",value))
+    print(str.join(" ",value))
+
+# Print one value
+else:
+    d("type is [%s]" % type(value))
+    d("value [%s]" % value)
+    print(value)
+

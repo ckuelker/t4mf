@@ -1,0 +1,33 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# +---------------------------------------------------------------------------+
+# | t4mf-version-compare                                                      |
+# |                                                                           |
+# | Compare 2 versions                                                        |
+# |                                                                           |
+# | Version: 0.1.0 (change inline)                                            |
+# |                                                                           |
+# | Copyright: (C) 2022 Christian Külker <c@c8i.org>                          |
+# |                                                                           |
+# | Changes:                                                                  |
+# |                                                                           |
+# | 0.1.0 2022-09-07 Christian Külker <c@c8i.org>                             |
+# |     - Initial release                                                     |
+# |                                                                           |
+# +---------------------------------------------------------------------------+
+# USAGE:
+#  t4mf-version-compare VERSION1 VERSION2
+#
+#  If VERSION1 > VERSION2: exit OK
+#  Else exit ERROR
+import sys
+from packaging import version # Debian python3-packaging
+
+left = sys.argv[1]
+right = sys.argv[2]
+
+if version.parse(left ) > version.parse(right):
+    sys.exit(0)
+else:
+    sys.exit(1)
+

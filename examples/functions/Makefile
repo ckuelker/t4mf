@@ -1,7 +1,7 @@
 # +---------------------------------------------------------------------------+
 # | Makefile                                                                  |
 # |                                                                           |
-# | Examples for tet functions                                                |
+# | Examples for test functions                                               |
 # |                                                                           |
 # | Version: 0.1.0 (change inline)                                            |
 # |                                                                           |

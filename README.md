@@ -2,8 +2,8 @@
 title: Tools For Makefiles README
 linkTitle: T4MF
 author: Christian Külker
-date: 2022-06-25
-version: 0.1.0
+date: 2023-05-23
+version: 0.1.1
 
 ---
 
@@ -63,6 +63,13 @@ often be neglected.
   a version and if not a match (or higher) it bails out with an error. While
   `t4mf-version-compare-ok` will compare two versions an print 'OK' if it is
   match or higher.
+
+### Checksums
+
+- To validate a build output or downloaded file, a checksum can be used for the
+  task. The `t4mf-md5sum-check-ok` uses `md5sum` to check a given file. It
+  takes a filename and a checksum and checks the file against the checksum. It
+  prints the result and returns a code.
 
 ## Functions
 
@@ -298,6 +305,7 @@ TEXT is not defined. Use 'make TEXT=OK test'
 
 | Version | Date       | Notes                                                |
 | ------- | ---------- | ---------------------------------------------------- |
+| 0.1.1   | 2023-05-23 | + t4mf-md5sum-check-ok: 4 tests, 1 example           |
 | 0.1.0   | 2022-09-26 | Initial release                                      |
 
 [t4mf.git]: https://github.com/ckuelker/t4mf

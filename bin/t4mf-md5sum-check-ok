@@ -1,0 +1,33 @@
+#!/usr/bin/bash
+# +---------------------------------------------------------------------------+
+# | t4mf-md5sum-check-ok                                                      |
+# |                                                                           |
+# | Checks a given filename and md5sum and prints OK with exit code 0         |
+# | if they match and it prints NG with exit code 1 if they do not match.     |
+# | It will exit with code 2 or 3 if the script is used in a wrong way.       |
+# |                                                                           |
+# | Version: 0.1.0                                                            |
+# |                                                                           |
+# | Copyright: 2023 by Christian Külker                                       |
+# |                                                                           |
+# | Changes:                                                                  |
+# |                                                                           |
+# | 0.1.0 2023-05-23 c@c8i.org                                                |
+# |     - Initial release                                                     |
+# |                                                                           |
+# +---------------------------------------------------------------------------+
+# Check if filename and a md5sum is provided, if not print a usage message
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 filename md5sum"
+    exit 2
+fi
+# Check if the file exists, if not print a message and exit with code 3
+if [ ! -f "$1" ]; then
+    echo "File $1 does not exist"
+    exit 3
+fi
+# Calculate the md5sum of the file and compare it with the provided md5sum, 
+# print 'OK' if they match and 'NG' if they don't match. The exit status of
+# the script is 0 if they match and 1 if they don't match. "NG" stands for
+# "No Good" or "No go" and "OK" for "Okay".
+md5sum -c --status <(echo "$2  $1") && echo "OK" || echo "NG"

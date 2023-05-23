@@ -1,0 +1,43 @@
+#!/usr/bin/bash
+# +---------------------------------------------------------------------------+
+# | tests/t4mf-md5sum-check-ok                                                |
+# |                                                                           |
+# | Tests bin/t4mf-md5sum-check-ok                                            |
+# |                                                                           |
+# +---------------------------------------------------------------------------+
+
+# Path to the script under test
+SCRIPT_PATH="../bin/t4mf-md5sum-check-ok"
+
+echo "Hello, World!" > testfile.txt # Create a test file
+
+# Calculate its md5sum
+EXPECTED_MD5SUM=$(md5sum testfile.txt | awk '{ print $1 }')
+
+# Case 1: Run the script with correct arguments and expect "OK"
+RESULT=$($SCRIPT_PATH testfile.txt $EXPECTED_MD5SUM)
+if [ "$RESULT" == "OK" ]; then echo "PASS test 1"; else echo "FAIL test 1"; fi
+
+# Case 2: Run the script with wrong md5sum and expect "NG"
+WRONG_MD5SUM="12AB34CD56EF78AB90CD12EF34AB56CD"
+RESULT=$($SCRIPT_PATH testfile.txt $WRONG_MD5SUM)
+if [ "$RESULT" == "NG" ]; then echo "PASS test 2"; else echo "FAIL test 2"; fi
+
+# Case 3: Run the script with non-existent file and expect error message
+RESULT=$($SCRIPT_PATH non_existent_file.txt $EXPECTED_MD5SUM)
+if [ "$RESULT" == "File non_existent_file.txt does not exist" ]; then
+    echo "PASS test 3"
+else
+    echo "FAIL test 3"
+fi
+
+# Case 4: Run the script with wrong number of arguments and expect usage message
+RESULT=$($SCRIPT_PATH)
+if [ "$RESULT" == "Usage: $SCRIPT_PATH filename md5sum" ]; then
+    echo "PASS test 4"
+else
+    echo "FAIL test 4"
+fi
+
+rm testfile.txt # Clean up the test file
+
